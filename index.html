@@ -851,18 +851,18 @@ function openMalssami(){
  layout.addEventListener('pointercancel',()=>{drag?.ghost?.remove();drag=null;});paint();cells[0].focus();
 }
 const malOldPanel=panel;panel=function(...args){$('puzzleModal').classList.remove('malssami-open');return malOldPanel(...args);};
-captureRegion(0,()=>{
- // The activity belongs to the existing house on the right of the western yard.
- house(-30,13,6,4);roofLabel('한글말싸미',-14,6.5,15,5.2);
- box(7,.08,4.7,'#d9c59e',-14,.03,19.4);
- box(5.6,.22,2.6,'#9b663f',-14,1.1,19.1);
- box(5.35,.035,2.35,'#b88a58',-14,1.225,19.1);
- for(let x of [-16.3,-11.7])for(let z of [18.1,20.1])box(.18,1,.18,'#6d4935',x,.55,z);
- obstacle(-14,19.1,5.6,2.6);
+// Both villages share the same square-card stall and the same game.
+function buildMalssamiBooth(x,z){
+ roofLabel('한글말싸미',x,6.5,z,5.2);
+ box(7,.08,4.7,'#d9c59e',x,.03,z+4.4);
+ box(5.6,.22,2.6,'#9b663f',x,1.1,z+4.1);
+ box(5.35,.035,2.35,'#b88a58',x,1.225,z+4.1);
+ for(let dx of [-2.3,2.3])for(let dz of [3.1,5.1])box(.18,1,.18,'#6d4935',x+dx,.55,z+dz);
+ obstacle(x,z+4.1,5.6,2.6);
  // Individual square cards, interleaved sounds, small rotations and layered piles.
  const spread=[['ㄱ',-2.08,-.56,-.13],['ㅏ',-1.06,-.65,.12],['ㅁ',.05,-.54,-.08],['ㅗ',1.11,-.61,.16],['ㄴ',2.07,-.46,-.18],['ㅓ',-2.03,.52,.14],['ㅅ',-1.01,.43,-.15],['ㅣ',.06,.54,.08],['ㅇ',1.13,.42,-.12],['ㅜ',2.09,.57,.17]];
- spread.forEach(([glyph,x,z,angle],i)=>{
-  const card=new THREE.Group();card.position.set(-14+x,1.26+i*.002,19.1+z);card.rotation.y=angle;scene.add(card);
+ spread.forEach(([glyph,dx,dz,angle],i)=>{
+  const card=new THREE.Group();card.position.set(x+dx,1.26+i*.002,z+4.1+dz);card.rotation.y=angle;scene.add(card);
   if(i===1||i===8){const under=box(.84,.025,.84,'#d6be91',.065,-.012,.045,card);under.rotation.y=-.18;}
   box(.84,.035,.84,'#dfcfad',0,0,0,card);
   const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');
@@ -872,8 +872,11 @@ captureRegion(0,()=>{
   const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;
   const face=new THREE.Mesh(new THREE.PlaneGeometry(.83,.83),new THREE.MeshBasicMaterial({map:texture}));face.rotation.x=-Math.PI/2;face.position.y=.02;card.add(face);
  });
-});
-const malOldCandidates=candidates;candidates=function(){const list=malOldCandidates();if(extra().region===0)list.push({x:-14,z:21.25,name:'한글말싸미 단어 카드 만들기',run:openMalssami});return list;};
+}
+captureRegion(0,()=>{house(-30,13,6,4);buildMalssamiBooth(-14,15);});
+captureRegion(2,()=>{buildMalssamiBooth(182,15);});
+const malBooths=[{region:0,x:-14,z:21.25},{region:2,x:182,z:21.25}];
+const malOldCandidates=candidates;candidates=function(){const list=malOldCandidates();for(const booth of malBooths)if(extra().region===booth.region)list.push({x:booth.x,z:booth.z,name:'한글말싸미 단어 카드 만들기',run:openMalssami});return list;};
 let startGuideOpen=false;
 function openStartGuide(){startGuideOpen=true;started=false;modal=true;keys.clear();releaseStick();$('startGuide').classList.remove('hidden');$('startGuideDone').textContent=stage===0?'알겠어요! 모험 시작하기 →':'알겠어요! 모험 이어가기 →';$('startGuideDone').focus();}
 function finishStartGuide(){if(!startGuideOpen)return;startGuideOpen=false;$('startGuide').classList.add('hidden');keys.clear();started=true;modal=false;toast(stage===0?'소담이를 찾아서 첫 이야기를 시작해요':'저장한 원정을 이어서 시작해요');}
